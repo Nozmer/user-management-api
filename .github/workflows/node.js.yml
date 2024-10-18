@@ -35,7 +35,7 @@ jobs:
 
     - name: Start Docker containers
       run: |
-        docker-compose up -d
+        docker compose up -d
 
     - name: Run tests
       run: npm test
