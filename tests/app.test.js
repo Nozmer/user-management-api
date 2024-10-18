@@ -1,10 +1,13 @@
-require('dotenv').config();
+import dotenv from 'dotenv';
+dotenv.config();
 
 import request from 'supertest';
 import { compare, hash } from 'bcrypt';
 import { connectToDatabase, disconnectFromDatabase } from '../database';
-import { verify, sign } from 'jsonwebtoken';
-import { join } from 'path';
+import { jest } from '@jest/globals';
+import jwt from 'jsonwebtoken';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 import { existsSync, unlinkSync } from 'fs';
 import { app } from '../app';
 import { User } from '../models/user';
@@ -19,7 +22,7 @@ beforeAll(async () => {
         await connectToDatabase();
     } catch (error) {
         console.error(error.message);
-        throw error; 
+        throw error;
     }
 });
 
@@ -163,7 +166,7 @@ describe('POST /api/auth/signin', () => {
         expect(res.body.token.split('.').length).toBe(3);
 
         // Decode the token and check if the content is correct
-        const decodedToken = verify(res.body.token, SECRET_KEY);
+        const decodedToken = jwt.verify(res.body.token, SECRET_KEY);
         expect(decodedToken).toHaveProperty('userId');
         expect(decodedToken.userId.toString()).toBe(registeredUser._id.toString());
         expect(decodedToken.email).toBe('testuser@example.com');
@@ -558,6 +561,9 @@ describe('POST /api/user/profile-photo', () => {
     });
 
     it('should upload a profile photo successfully', async () => {
+
+        const __filename = fileURLToPath(import.meta.url);
+        const __dirname = dirname(__filename);
         const filePath = join(__dirname, 'test-files', 'profile-photo.jpg'); // Caminho do arquivo de teste
 
         if (!existsSync(filePath)) {
@@ -602,6 +608,8 @@ describe('POST /api/user/profile-photo', () => {
         await registerTestUser();
         const token = await loginAndGetToken();
 
+        const __filename = fileURLToPath(import.meta.url);
+        const __dirname = dirname(__filename);
         const filePath = join(__dirname, 'test-files', 'invalid-file.txt'); // Invalid file
 
         const res = await request(app)
@@ -617,6 +625,8 @@ describe('POST /api/user/profile-photo', () => {
         await registerTestUser();
         const token = await loginAndGetToken();
 
+        const __filename = fileURLToPath(import.meta.url);
+        const __dirname = dirname(__filename);
         const filePath = join(__dirname, 'test-files', 'large-photo.jpg'); // Arquivo grande de teste
 
         const res = await request(app)
@@ -630,7 +640,7 @@ describe('POST /api/user/profile-photo', () => {
 });
 
 describe('Auth Middleware', () => {
-    const token = sign({ userId: 1, email: 'testuser@example.com' }, SECRET_KEY, { expiresIn: '1h' });
+    const token = jwt.sign({ userId: 1, email: 'testuser@example.com' }, SECRET_KEY, { expiresIn: '1h' });
 
     it('should return 401 if no token is provided', () => {
         const req = { get: jest.fn().mockReturnValue(null) }; // Mock de req.get()

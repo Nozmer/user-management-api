@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-import { verify } from 'jsonwebtoken-esm';
+import jwt from 'jsonwebtoken';
 const SECRET_KEY = process.env.SECRET_KEY;
 
 function authMiddleware(req, res, next) {
@@ -11,7 +11,7 @@ function authMiddleware(req, res, next) {
     }
 
     try {
-        const decoded = verify(token, SECRET_KEY);
+        const decoded = jwt.verify(token, SECRET_KEY);
         req.user = decoded;
         next();
     } catch (err) {

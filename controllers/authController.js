@@ -1,14 +1,14 @@
 import dotenv from 'dotenv';
 import { hash, compare } from 'bcrypt';
-import { sign } from 'jsonwebtoken-esm';
+import jwt from 'jsonwebtoken';
 import { User } from '../models/user.js';
 import { userSchema } from '../utils/validationSchemas.js';
 import winston from 'winston'; 
 
+dotenv.config();
 const SECRET_KEY = process.env.SECRET_KEY; 
 // Load secret key from environment variable for JWT signing
 
-dotenv.config();
 
 const logger = winston.createLogger({
     level: 'info', 
@@ -104,7 +104,7 @@ export async function signin(req, res) {
         return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    const token = sign({ userId: userExists._id, email: userExists.email }, SECRET_KEY, { expiresIn: '1h' });
+    const token = jwt.sign({ userId: userExists._id, email: userExists.email }, SECRET_KEY, { expiresIn: '1h' });
     // Generate JWT for authenticated user
 
     logger.info({
