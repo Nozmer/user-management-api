@@ -1,12 +1,18 @@
 import multer, { diskStorage } from 'multer';
 import { extname as _extname } from 'path';
 import { fileURLToPath } from 'url';
+import fs from 'fs';
 import { dirname, join } from 'path';
 
 // Configurar o local de armazenamento e o nome do arquivo
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+
 const uploadDirectory = join(__dirname, '../uploads/');
+
+if (!fs.existsSync(uploadDirectory)) {
+    fs.mkdirSync(uploadDirectory, { recursive: true });
+}
 
 const storage = diskStorage({
     destination: function (req, file, cb) {
